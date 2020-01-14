@@ -107,7 +107,7 @@ class Dompdf
     /**
      * Desired paper size ('letter', 'legal', 'A4', etc.)
      *
-     * @var string|array
+     * @var string
      */
     private $paperSize;
 
@@ -199,7 +199,7 @@ class Dompdf
     private $defaultViewOptions = array();
 
     /**
-     * Tells whether the DOM document is in quirksmode (experimental)
+     * Tells wether the DOM document is in quirksmode (experimental)
      *
      * @var bool
      */
@@ -272,11 +272,6 @@ class Dompdf
     public function __construct($options = null)
     {
         mb_internal_encoding('UTF-8');
-
-        if (version_compare(PHP_VERSION, '7.0.0') >= 0)
-        {
-            ini_set('pcre.jit', 0);
-        }
 
         if (isset($options) && $options instanceof Options) {
             $this->setOptions($options);
@@ -373,7 +368,7 @@ class Dompdf
 
             $ext = strtolower(pathinfo($realfile, PATHINFO_EXTENSION));
             if (!in_array($ext, $this->allowedLocalFileExtensions)) {
-                throw new Exception("Permission denied on $file. This file extension is forbidden");
+                throw new Exception("Permission denied on $file.");
             }
 
             if (!$realfile) {
@@ -384,9 +379,6 @@ class Dompdf
         }
 
         list($contents, $http_response_header) = Helpers::getFileContent($file, $this->httpContext);
-        if (empty($contents)) {
-            throw new Exception("File '$file' not found.");
-        }
         $encoding = 'UTF-8';
 
         // See http://the-stickman.com/web-development/php/getting-http-response-headers-when-using-file_get_contents/
@@ -405,8 +397,8 @@ class Dompdf
     }
 
     /**
-     * @param string $str
-     * @param string $encoding
+     * @param $str
+     * @param null $encoding
      * @deprecated
      */
     public function load_html($str, $encoding = 'UTF-8')
@@ -479,7 +471,7 @@ class Dompdf
             $doc = $tokenizer->save();
 
             // Remove #text children nodes in nodes that shouldn't have
-            $tag_names = array("html", "head", "table", "tbody", "thead", "tfoot", "tr");
+            $tag_names = array("html", "table", "tbody", "thead", "tfoot", "tr");
             foreach ($tag_names as $tag_name) {
                 $nodes = $doc->getElementsByTagName($tag_name);
 
@@ -499,7 +491,7 @@ class Dompdf
             $doc->encoding = $encoding;
 
             // Remove #text children nodes in nodes that shouldn't have
-            $tag_names = array("html", "head", "table", "tbody", "thead", "tfoot", "tr");
+            $tag_names = array("html", "table", "tbody", "thead", "tfoot", "tr");
             foreach ($tag_names as $tag_name) {
                 $nodes = $doc->getElementsByTagName($tag_name);
 
@@ -615,7 +607,7 @@ class Dompdf
                             if (!$accept) {
                                 //found at least one mediatype, but none of the accepted ones
                                 //Skip this css file.
-                                break;
+                                continue;
                             }
                         }
 
@@ -636,7 +628,7 @@ class Dompdf
                         ($media = $tag->getAttribute("media")) &&
                         !in_array($media, $acceptedmedia)
                     ) {
-                        break;
+                        continue;
                     }
 
                     $css = "";
@@ -843,7 +835,7 @@ class Dompdf
             }
         }
 
-        $root->set_containing_block(0, 0, $canvas->get_width(), $canvas->get_height());
+        $root->set_containing_block(0, 0,$canvas->get_width(), $canvas->get_height());
         $root->set_renderer(new Renderer($this));
 
         // This is where the magic happens:
@@ -953,7 +945,7 @@ class Dompdf
      *
      * @param array $options options (see above)
      *
-     * @return string|null
+     * @return string
      */
     public function output($options = array())
     {
@@ -1038,7 +1030,7 @@ class Dompdf
     /**
      * Sets the paper size & orientation
      *
-     * @param string|array $size 'letter', 'legal', 'A4', etc. {@link Dompdf\Adapter\CPDF::$PAPER_SIZES}
+     * @param string $size 'letter', 'legal', 'A4', etc. {@link Dompdf\Adapter\CPDF::$PAPER_SIZES}
      * @param string $orientation 'portrait' or 'landscape'
      * @return $this
      */

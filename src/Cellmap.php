@@ -109,14 +109,14 @@ class Cellmap
     private $__row;
 
     /**
-     * Tells whether the columns' width can be modified
+     * Tells wether the columns' width can be modified
      *
      * @var bool
      */
     private $_columns_locked = false;
 
     /**
-     * Tells whether the table has table-layout:fixed
+     * Tells wether the table has table-layout:fixed
      *
      * @var bool
      */
@@ -452,6 +452,7 @@ class Cellmap
         $row["height"] = $height;
         $next_row =& $this->get_row($i + 1);
         $next_row["y"] = $row["y"] + $height;
+
     }
 
     /**

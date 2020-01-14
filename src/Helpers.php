@@ -63,7 +63,7 @@ class Helpers
         }
 
         // Is the url already fully qualified, a Data URI, or a reference to a named anchor?
-        if (mb_strpos($url, "://") !== false || mb_substr($url, 0, 1) === "#" || mb_strpos($url, "data:") === 0 || mb_strpos($url, "mailto:") === 0 || mb_strpos($url, "tel:") === 0) {
+        if (mb_strpos($url, "://") !== false || mb_substr($url, 0, 1) === "#" || mb_strpos($url, "data:") === 0 || mb_strpos($url, "mailto:") === 0) {
             return $url;
         }
 
@@ -237,7 +237,7 @@ class Helpers
         $score = array(
             '%23'=>'#'
         );
-        return strtr(rawurlencode(rawurldecode($uri)), array_merge($reserved, $unescaped, $score));
+        return strtr(rawurlencode(rawurldecode($uri)), array_merge($reserved,$unescaped,$score));
     }
 
     /**
@@ -583,7 +583,6 @@ class Helpers
      * getimagesize doesn't give a good size for 32bit BMP image v5
      *
      * @param string $filename
-     * @param resource $context
      * @return array The same format as getimagesize($filename)
      */
     public static function dompdf_getimagesize($filename, $context = null)
@@ -609,22 +608,22 @@ class Helpers
         if ($width == null || $height == null) {
             list($data, $headers) = Helpers::getFileContent($filename, $context);
 
-            if (!empty($data)) {
-                if (substr($data, 0, 2) === "BM") {
-                    $meta = unpack('vtype/Vfilesize/Vreserved/Voffset/Vheadersize/Vwidth/Vheight', $data);
-                    $width = (int)$meta['width'];
-                    $height = (int)$meta['height'];
-                    $type = "bmp";
-                } else {
-                    if (strpos($data, "<svg") !== false) {
-                        $doc = new \Svg\Document();
-                        $doc->loadFile($filename);
+            if (substr($data, 0, 2) === "BM") {
+                $meta = unpack('vtype/Vfilesize/Vreserved/Voffset/Vheadersize/Vwidth/Vheight', $data);
+                $width = (int)$meta['width'];
+                $height = (int)$meta['height'];
+                $type = "bmp";
+            }
+            else {
+                if (strpos($data, "<svg") !== false) {
+                    $doc = new \Svg\Document();
+                    $doc->loadFile($filename);
 
-                        list($width, $height) = $doc->getDimensions();
-                        $type = "svg";
-                    }
+                    list($width, $height) = $doc->getDimensions();
+                    $type = "svg";
                 }
             }
+
         }
 
         return $cache[$filename] = array($width, $height, $type);
@@ -818,11 +817,11 @@ class Helpers
      * @param resource $context (ignored if curl is used)
      * @param int $offset
      * @param int $maxlen (ignored if curl is used)
-     * @return string[]
+     * @return bool|array
      */
     public static function getFileContent($uri, $context = null, $offset = 0, $maxlen = null)
     {
-        $content = null;
+        $result = false;
         $headers = null;
         list($proto, $host, $path, $file) = Helpers::explode_url($uri);
         $is_local_path = ($proto == "" || $proto === "file://");
@@ -837,10 +836,6 @@ class Helpers
                 $result = file_get_contents($uri, null, $context, $offset, $maxlen);
             } else {
                 $result = file_get_contents($uri, null, $context, $offset);
-            }
-            if ($result !== false)
-            {
-                $content = $result;
             }
             if (isset($http_response_header)) {
                 $headers = $http_response_header;
@@ -859,22 +854,15 @@ class Helpers
             }
 
             $data = curl_exec($curl);
-
-            if ($data !== false && !curl_errno($curl)) {
-                switch ($http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE)) {
-                    case 200:
-                        $raw_headers = substr($data, 0, curl_getinfo($curl, CURLINFO_HEADER_SIZE));
-                        $headers = preg_split("/[\n\r]+/", trim($raw_headers));
-                        $content = substr($data, curl_getinfo($curl, CURLINFO_HEADER_SIZE));
-                        break;
-                }
-            }
+            $raw_headers = substr($data, 0, curl_getinfo($curl, CURLINFO_HEADER_SIZE));
+            $headers = preg_split("/[\n\r]+/", trim($raw_headers));
+            $result = substr($data, curl_getinfo($curl, CURLINFO_HEADER_SIZE));
             curl_close($curl);
         }
 
         restore_error_handler();
 
-        return array($content, $headers);
+        return array($result, $headers);
     }
 
     public static function mb_ucwords($str) {

@@ -174,9 +174,6 @@ class GD implements Canvas
         $this->_actual_width = $this->_upscale($this->_width);
         $this->_actual_height = $this->_upscale($this->_height);
 
-        $this->_page_number = $this->_page_count = 1;
-        $this->_page_text = array();
-        
         if (is_null($bg_color) || !is_array($bg_color)) {
             // Pure white bg
             $bg_color = array(1, 1, 1, 0);
@@ -732,7 +729,7 @@ class GD implements Canvas
         $func_name = "imagecreatefrom$img_type";
         if (!function_exists($func_name)) {
             if (!method_exists("Dompdf\Helpers", $func_name)) {
-                throw new \Exception("Function $func_name() not found.  Cannot convert $img_type image: $img_url.  Please install the image PHP extension.");
+                throw new \Exception("Function $func_name() not found.  Cannot convert $type image: $img_url.  Please install the image PHP extension.");
             }
             $func_name = "\\Dompdf\\Helpers::" . $func_name;
         }
@@ -977,11 +974,6 @@ class GD implements Canvas
     }
 
     public function page_text()
-    {
-        // N/A
-    }
-
-    public function page_line()
     {
         // N/A
     }

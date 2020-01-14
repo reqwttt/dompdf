@@ -15,9 +15,6 @@
  * @license Public Domain http://creativecommons.org/licenses/publicdomain/
  * @package Cpdf
  */
-
-namespace Dompdf;
-
 use FontLib\Font;
 use FontLib\BinaryStream;
 
@@ -312,12 +309,12 @@ class Cpdf
     /**
      * @var string The target internal encoding
      */
-    protected static $targetEncoding = 'Windows-1252';
+    static protected $targetEncoding = 'Windows-1252';
 
     /**
      * @var array The list of the core fonts
      */
-    protected static $coreFonts = array(
+    static protected $coreFonts = array(
         'courier',
         'courier-bold',
         'courier-oblique',
@@ -467,28 +464,28 @@ class Cpdf
                         // Named with limited valid values
                         case 'NonFullScreenPageMode':
                             if (!in_array($v, array('UseNone', 'UseOutlines', 'UseThumbs', 'UseOC'))) {
-                                break;
+                                continue;
                             }
                             $o['info'][$k] = $v;
                             break;
 
                         case 'Direction':
                             if (!in_array($v, array('L2R', 'R2L'))) {
-                                break;
+                                continue;
                             }
                             $o['info'][$k] = $v;
                             break;
 
                         case 'PrintScaling':
                             if (!in_array($v, array('None', 'AppDefault'))) {
-                                break;
+                                continue;
                             }
                             $o['info'][$k] = $v;
                             break;
 
                         case 'Duplex':
                             if (!in_array($v, array('None', 'AppDefault'))) {
-                                break;
+                                continue;
                             }
                             $o['info'][$k] = $v;
                             break;
@@ -1838,10 +1835,10 @@ EOT;
                     }
 
                     switch ($options['channels']) {
-                        case 1:
+                        case  1:
                             $info['ColorSpace'] = '/DeviceGray';
                             break;
-                        case 4:
+                        case  4:
                             $info['ColorSpace'] = '/DeviceCMYK';
                             break;
                         default:
@@ -2314,7 +2311,7 @@ EOT;
         }
 
         if ($this->fileIdentifier === '') {
-            $tmp = implode('', $this->objects[$this->infoObject]['info']);
+            $tmp = implode('',  $this->objects[$this->infoObject]['info']);
             $this->fileIdentifier = md5('DOMPDF' . __FILE__ . $tmp . microtime() . mt_rand());
         }
 
@@ -2545,7 +2542,7 @@ EOT;
                             $width = floatval($dtmp['WX']);
 
                             if ($c >= 0) {
-                                if (!ctype_xdigit($n) || $c != hexdec($n)) {
+                                if ($c != hexdec($n)) {
                                     $data['codeToName'][$c] = $n;
                                 }
                                 $data['C'][$c] = $width;
@@ -2598,7 +2595,7 @@ EOT;
                                     $cidtogid[$c * 2 + 1] = chr($glyph & 0xFF);
                                 }
 
-                                if (!ctype_xdigit($n) || $c != hexdec($n)) {
+                                if ($c != hexdec($n)) {
                                     $data['codeToName'][$c] = $n;
                                 }
                                 $data['C'][$c] = $width;
@@ -3347,8 +3344,7 @@ EOT;
 
     /**
      * draw a bezier curve based on 4 control points
-     */
-    function quadTo($cpx, $cpy, $x, $y)
+     */    function quadTo($cpx, $cpy, $x, $y)
     {
         $this->addContent(sprintf("\n%.3F %.3F %.3F %.3F v", $cpx, $cpy, $x, $y));
     }
@@ -4076,7 +4072,7 @@ EOT;
                     for ($j = 1; $j < $numbytes; $j++) {
                         $c += ($bytes[$j] << (($numbytes - $j - 1) * 0x06));
                     }
-                    if ((($c >= 0xD800) and ($c <= 0xDFFF)) or ($c >= 0x10FFFF)) {
+                    if ((($c >= 0xD800) AND ($c <= 0xDFFF)) OR ($c >= 0x10FFFF)) {
                         // The definition of UTF-8 prohibits encoding character numbers between
                         // U+D800 and U+DFFF, which are reserved for use with the UTF-16
                         // encoding form (as surrogate pairs) and do not directly represent
@@ -4805,12 +4801,12 @@ EOT;
         imagesavealpha($img, false);
 
         // create temp alpha file
-        $tempfile_alpha = @tempnam($this->tmp, "cpdf_img_");
+        $tempfile_alpha = tempnam($this->tmp, "cpdf_img_");
         @unlink($tempfile_alpha);
         $tempfile_alpha = "$tempfile_alpha.png";
 
         // create temp plain file
-        $tempfile_plain = @tempnam($this->tmp, "cpdf_img_");
+        $tempfile_plain = tempnam($this->tmp, "cpdf_img_");
         @unlink($tempfile_plain);
         $tempfile_plain = "$tempfile_plain.png";
 
@@ -4860,7 +4856,7 @@ EOT;
             // the first version containing it was 3.0.1RC1
             static $imagickClonable = null;
             if ($imagickClonable === null) {
-                $imagickClonable = version_compare(\Imagick::IMAGICK_EXTVER, '3.0.1rc1') > 0;
+                $imagickClonable = version_compare(Imagick::IMAGICK_EXTVER, '3.0.1rc1') > 0;
             }
 
             $imagick = new \Imagick($file);
